@@ -6,17 +6,11 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <thread>
+#include <QDebug>
 
 #include "qspdlog/qabstract_spdlog_toolbar.hpp"
 #include "qspdlog/qspdlog.hpp"
-#include "spdlog/spdlog.h"
-
-std::shared_ptr<spdlog::logger> createLogger(std::string name)
-{
-    auto logger = std::make_shared<spdlog::logger>(name);
-    logger->set_level(spdlog::level::trace);
-    return logger;
-}
+#include <loguru.hpp>
 
 void configureColorScheme()
 {
@@ -65,7 +59,7 @@ void configureColorScheme()
 }
 
 void configureToolbar(
-    QToolBar& toolbar, QSpdLog& logView, std::shared_ptr<spdlog::logger> logger
+    QToolBar& toolbar, QSpdLog& logView
 )
 {
     QAction* clearAction = toolbar.addAction("Clear");
@@ -75,45 +69,44 @@ void configureToolbar(
     generateAction->connect(
         generateAction,
         &QAction::triggered,
-        [ logger ](bool) {
-        // generate 10 messages with random levels
-        for (int i = 0; i < 10; ++i)
-            logger->log(
-                static_cast<spdlog::level::level_enum>(
-                    rand() % spdlog::level::off
-                ),
-                "Message {}",
-                i
-            );
+        [] (bool) {
+            // generate 10 messages with random levels
+            for (int i = 0; i < 10; ++i) {
+                int level = -(rand() % 4);
+                switch (level) {
+                    // case 0: LOG_F(TRACE, "Message %d", i); break;
+                    // case 1: LOG_F(DEBUG, "Message %d", i); break;
+                    case 0: LOG_F(INFO,  "Message %d", i); break;
+                    case -1: LOG_F(WARNING, "Message %d", i); break;
+                    case -2: LOG_F(ERROR, "Message %d", i); break;
+                }
+            }
         });
 
     generateMultipleAction->connect(
         generateMultipleAction,
         &QAction::triggered,
-        [ &logView, logger ](bool) {
-        // create 10 threads and generate 10 messages with random levels
-        std::vector<std::thread> threads;
-        for (int i = 0; i < 10; ++i) {
-            threads.emplace_back([ &logView, i, logger ]() {
-                auto threadLocalLogger =
-                    createLogger(fmt::format("thread {}", i));
-                threadLocalLogger->sinks().push_back(logView.sink());
-                logger->info("Thread {} started", i);
-                for (int i = 0; i < 10; ++i) {
-                    threadLocalLogger->log(
-                        static_cast<spdlog::level::level_enum>(
-                            rand() % spdlog::level::off
-                        ),
-                        "Message {}",
-                        i
-                    );
-                }
-                logger->info("Thread {} finished", i);
-            });
-        }
-
-        for (auto& thread : threads)
-            thread.join();
+        [] (bool) {
+            // create 10 threads and generate 10 messages with random levels
+            std::vector<std::thread> threads;
+            for (int i = 0; i < 10; ++i) {
+                threads.emplace_back([i]() {
+                    LOG_F(INFO, "Thread %d started", i);
+                    for (int j = 0; j < 10; ++j) {
+                        int level = rand() % 5;
+                        switch (level) {
+                            // case 0: LOG_F(TRACE, "[thread %d] Message %d", i, j); break;
+                            // case 1: LOG_F(DEBUG, "[thread %d] Message %d", i, j); break;
+                            case 2: LOG_F(INFO,  "[thread %d] Message %d", i, j); break;
+                            case 3: LOG_F(WARNING, "[thread %d] Message %d", i, j); break;
+                            case 4: LOG_F(ERROR, "[thread %d] Message %d", i, j); break;
+                        }
+                    }
+                    LOG_F(INFO, "Thread %d finished", i);
+                });
+            }
+            for (auto& thread : threads)
+                thread.join();
         });
 
     clearAction->connect(clearAction, &QAction::triggered, [ &logView ](bool) {
@@ -125,11 +118,11 @@ int main(int argc, char** argv)
 {
     Q_INIT_RESOURCE(qspdlog_resources);
 
+    loguru::init(argc, argv);
+
     QApplication app(argc, argv);
 
     configureColorScheme();
-
-    auto logger = createLogger("main");
 
     QToolBar toolbar("Manipulation toolbar");
     toolbar.show();
@@ -142,12 +135,10 @@ int main(int argc, char** argv)
     log.registerToolbar(logToolbar);
     dynamic_cast<QWidget*>(logToolbar)->show();
 
-    logger->sinks().push_back(log.sink());
-
-    configureToolbar(toolbar, log, logger);
+    configureToolbar(toolbar, log);
+    log.setMaxEntries(10);
+    qDebug() << *log.getMaxEntries();
 
     int result = app.exec();
-    spdlog::shutdown();
-
     return result;
 }

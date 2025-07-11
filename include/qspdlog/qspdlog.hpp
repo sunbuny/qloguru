@@ -3,15 +3,8 @@
 #include <QFont>
 #include <QWidget>
 
-namespace spdlog
-{
-class logger;
-namespace sinks
-{
-class sink;
-} // namespace sinks
-} // namespace spdlog
 
+class QtLoggerSink;
 class QAbstractSpdLogToolBar;
 class QMenu;
 class QSpdLogModel;
@@ -73,15 +66,6 @@ public:
      */
     void removeToolbar(QAbstractSpdLogToolBar* toolbar);
 
-    /**
-     * @brief Get the sink.
-     *
-     * The sink should be used by the user to add it into any logger whose
-     * output the user want's to see in the widget.
-     *
-     * @return std::shared_ptr<spdlog::sinks::sink> the sink of the widget
-     */
-    std::shared_ptr<spdlog::sinks::sink> sink();
 
     /**
      * @brief Get the number of items in the widget.
@@ -192,6 +176,6 @@ private:
     QTreeView* _view;
     bool _scrollIsAtBottom;
     QMetaObject::Connection _scrollConnection;
-    std::shared_ptr<spdlog::sinks::sink> _sink;
+    std::shared_ptr<QtLoggerSink> _sink;
     std::list<QAbstractSpdLogToolBar*> _toolbars;
 };

@@ -11,7 +11,8 @@ public:
     Q_OBJECT
 public:
     struct entry_t {
-        std::chrono::duration<double> time;
+        std::string time;
+        std::string elapsed;
         int level;
         std::string message;
         std::string loggerName;

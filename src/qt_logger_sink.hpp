@@ -1,40 +1,54 @@
 #pragma once
-
-#include <spdlog/sinks/base_sink.h>
-
 #include "qspdlog_model.hpp"
+#include <regex>
+#include <string>
+#include <loguru.hpp>
+#include <QObject>
+#include <QString>
+#include <QMetaObject>
 
-template <typename Mutex>
-class qt_logger_sink : public spdlog::sinks::base_sink<Mutex>
-{
+class QtLoggerSink : public QObject {
+    Q_OBJECT
 public:
-    qt_logger_sink(QSpdLogModel* model)
-        : _model(model)
+    explicit QtLoggerSink(QSpdLogModel* model, QObject* parent = nullptr)
+        : QObject(parent), _model(model)
     {
+        loguru::add_callback("qt_logger_sink", QtLoggerSink::callback, _model, loguru::Verbosity_INFO);
+    }
+
+    static void callback(void* user_data, const loguru::Message& message)
+    {
+        if (!user_data) return;
+        QSpdLogModel::entry_t entry;
+        std::regex pattern(R"(.*?(\d{2}:\d{2}:\d{2}\.\d{3})\s+\(\s*([0-9.]+s)\)\s+\[\s*(.*?)\s*\])");
+        std::smatch match;
+        std::string preamble(message.preamble);
+        if (std::regex_search(preamble, match, pattern)) {
+            std::string time = match[1];
+            std::string elapsed = match[2];
+            std::string thread_id = match[3];
+            entry.time = time;
+            entry.elapsed = elapsed;
+            entry.loggerName = thread_id;
+        }else {
+            return;
+        }
+        entry.level = static_cast<int>(message.verbosity);
+        entry.message = message.message;
+        // make sure addEntry is call by QT GUI thread
+        auto model = (QSpdLogModel*)user_data;
+        QMetaObject::invokeMethod(model, [model, entry]() {
+            model->addEntry(entry);
+        }, Qt::QueuedConnection);
+    }
+
+    ~QtLoggerSink() override {
+        loguru::remove_callback("qt_logger_sink");
     }
 
     void invalidate() { _model = nullptr; }
-
-protected:
-    void sink_it_(const spdlog::details::log_msg& msg) override
-    {
-        if (!_model)
-            return;
-
-        _model->addEntry({ msg.time.time_since_epoch(),
-                           msg.level,
-                           fmt::to_string(msg.payload),
-                           fmt::to_string(msg.logger_name) });
-    }
-
-    void flush_() override { }
 
 private:
     QSpdLogModel* _model;
 };
 
-#include <mutex>
-
-#include "spdlog/details/null_mutex.h"
-using qt_logger_sink_mt = qt_logger_sink<std::mutex>;
-using qt_logger_sink_st = qt_logger_sink<spdlog::details::null_mutex>;

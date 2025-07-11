@@ -3,25 +3,32 @@
 #include <QFile>
 #include <QFont>
 #include <QIcon>
+#include <map>
+#include <array>
 
 #include "qspdlog_model.hpp"
 
 namespace
 {
 
-static constexpr std::array<const char*, 6> icon_names = {
-    ":/res/trace.png", ":/res/debug.png", ":/res/info.png",
-    ":/res/warn.png",  ":/res/error.png", ":/res/critical.png"
+static std::map<int, const char*> icon_names = {
+    {0, ":/res/info.png"},
+    {-1, ":/res/warn.png"},
+    {-2, ":/res/error.png"},
+    {-3, ":/res/critical.png"}
 };
 
-static constexpr std::array<const char*, 7> level_names = {
-    "Trace", "Debug", "Info", "Warning", "Error", "Critical", "Off"
+static  std::map<int, const char*> level_names = {
+     {0, "Info"},
+    {-1, "Warning"},
+    {-2, "Error"},
+    {-3,"Critical"}
 };
 
-enum class Column { Level = 0, Logger, Time, Message, Last };
+enum class Column { Level = 0, Logger, Time, Elapsed, Message, Last };
 
-static constexpr std::array<const char*, 4> column_names = {
-    "Level", "Logger", "Time", "Message"
+static constexpr std::array<const char*, 5> column_names = {
+    "Level", "Logger","Elapsed", "Time", "Message"
 };
 
 } // namespace
@@ -96,14 +103,12 @@ QVariant QSpdLogModel::data(const QModelIndex& index, int role) const
                 case Column::Logger: {
                     return QString::fromStdString(item.loggerName);
                 }
+                case Column::Elapsed: {
+                    return QString::fromStdString(item.elapsed);
+                }
 
                 case Column::Time: {
-                    return QDateTime::fromMSecsSinceEpoch(
-                        std::chrono::duration_cast<std::chrono::milliseconds>(
-                            item.time
-                        )
-                            .count()
-                    );
+                    return QString::fromStdString(item.time);
                 }
 
                 case Column::Message: {
@@ -121,7 +126,7 @@ QVariant QSpdLogModel::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole: {
             if (index.column() == 0) {
                 const auto& item = _items[ index.row() ];
-                if (item.level >= 0 && item.level < icon_names.size()) {
+                if (icon_names.count(_items[ index.row() ].level )) {
                     return QIcon(
                         QString(icon_names[ _items[ index.row() ].level ])
                     );

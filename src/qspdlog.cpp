@@ -6,7 +6,6 @@
 #include <QMenu>
 #include <QScrollBar>
 #include <QTreeView>
-#include <spdlog/logger.h>
 
 #include "qspdlog/qspdlog.hpp"
 
@@ -70,7 +69,7 @@ QSpdLog::QSpdLog(QWidget* parent)
 
     _view->setRootIsDecorated(false);
 
-    _sink = std::make_shared<qt_logger_sink_mt>(_sourceModel);
+    _sink = std::make_shared<QtLoggerSink>(_sourceModel);
 
     setLayout(new QHBoxLayout);
     layout()->setContentsMargins(0, 0, 0, 0);
@@ -79,7 +78,6 @@ QSpdLog::QSpdLog(QWidget* parent)
 
 QSpdLog::~QSpdLog()
 {
-    std::static_pointer_cast<qt_logger_sink_mt>(_sink)->invalidate();
 }
 
 void QSpdLog::clear() { _sourceModel->clear(); }
@@ -214,8 +212,6 @@ void QSpdLog::updateAutoScrollPolicy(int index)
     AutoScrollPolicy policy = static_cast<AutoScrollPolicy>(index);
     setAutoScrollPolicy(policy);
 }
-
-spdlog::sink_ptr QSpdLog::sink() { return _sink; }
 
 std::size_t QSpdLog::itemsCount() const
 {

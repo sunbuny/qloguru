@@ -23,11 +23,14 @@ else()
 endif()
 
 find_package(Qt${QT_VERSION} REQUIRED COMPONENTS Core Gui Widgets)
-find_package(spdlog REQUIRED)
+add_subdirectory(thirdparty)
+# find_package(spdlog REQUIRED)  # 移除 spdlog
+
 
 add_subdirectory(include)
 
-link_libraries(Qt::Widgets spdlog::spdlog qspdlog::interface)
+# link_libraries(Qt::Widgets spdlog::spdlog qspdlog::interface)
+link_libraries(Qt5::Widgets loguru qspdlog::interface)
 
 if(QSPDLOG_REPORT_COVERAGE)
   message("Building with coverage report")
