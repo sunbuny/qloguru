@@ -17,11 +17,11 @@
 #include <QTreeView>
 #include <QCheckBox>
 
-#include "qspdlog/qabstract_spdlog_toolbar.hpp"
-#include "qspdlog/qspdlog.hpp"
-#include "spdlog/spdlog.h"
+#include "qloguru/qabstract_loguru_toolbar.hpp"
+#include "qloguru/qloguru.hpp"
+#include "loguru.hpp"
 
-class QTestToolBar : public QAbstractSpdLogToolBar
+class QTestToolBar : public QAbstractLoguruToolBar
 {
 public:
     explicit QTestToolBar()
@@ -55,97 +55,56 @@ public:
     QComboBox* _autoScrollPolicy = new QComboBox;
 };
 
-class QSpdLogTest : public QObject
+class QLoguruTest : public QObject
 {
     Q_OBJECT
 
 public:
-    QSpdLogTest() { }
+    QLoguruTest() { }
 
 private slots:
     void checkMessageCountAllLevelsEnabled()
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
+        QLoguru widget;
 
-        logger->sinks().push_back(widget.sink());
-        logger->flush_on(spdlog::level::trace);
-        logger->set_level(spdlog::level::trace);
-        logger->trace("test");
-        logger->debug("test");
-        logger->info("test");
-        logger->warn("test");
-        logger->error("test");
-        logger->critical("test");
-
-        QCOMPARE(widget.itemsCount(), 6);
+        LOG_F(INFO, "test");
+        LOG_F(WARNING,"test");
+        LOG_F(ERROR, "test");
+        QTest::qWait(100);
+        QCOMPARE(widget.itemsCount(), 3);
     }
 
-    void disconnectionOfTheSink()
-    {
-        std::unique_ptr<QSpdLog> widget = std::make_unique<QSpdLog>();
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
-
-        logger->sinks().push_back(widget->sink());
-        logger->flush_on(spdlog::level::trace);
-        logger->info("test");
-        QCOMPARE(widget->itemsCount(), 1);
-        widget.reset();
-        logger->info("test");
-        logger->flush();
-    }
-
-    void addSinkToLoggerAndDestroy()
-    {
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
-        {
-            std::unique_ptr<QSpdLog> widget = std::make_unique<QSpdLog>();
-            logger->sinks().push_back(widget->sink());
-            logger->flush_on(spdlog::level::trace);
-            logger->info("test");
-            QCOMPARE(widget->itemsCount(), 1);
-        }
-        logger->info("test");
-        logger->flush();
-    }
 
     void clearLogHistory()
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
+        QLoguru widget;
 
-        logger->sinks().push_back(widget.sink());
-        logger->flush_on(spdlog::level::trace);
-        logger->info("test");
+        LOG_F(INFO, "test");
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 1);
         widget.clear();
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 0);
     }
 
     void limitLogTest()
     {
-        QSpdLog widget;
+        QLoguru widget;
         QCOMPARE(widget.getMaxEntries(), std::nullopt);
         widget.setMaxEntries(20);
         QCOMPARE(widget.getMaxEntries(), 20);
-        auto logger = std::make_shared<spdlog::logger>("test");
-
-        logger->sinks().push_back(widget.sink());
-        logger->flush_on(spdlog::level::trace);
-        logger->info("test");
+        LOG_F(INFO, "test");
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 1);
         for (int i = 0; i < 100; i++)
-            logger->info("test {0}", i);
-        logger->flush();
+            LOG_F(INFO, "test %d", i);
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 20);
         widget.setMaxEntries(std::nullopt);
         QCOMPARE(widget.getMaxEntries(), std::nullopt);
         for (int i = 0; i < 50; i++)
-            logger->info("test2 {0}", i);
+            LOG_F(INFO, "test %d", i);
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 70);
         widget.setMaxEntries(20);
         QCOMPARE(widget.getMaxEntries(), 20);
@@ -154,7 +113,7 @@ private slots:
 
     void backgroundForegroundColorTest()
     {
-        QSpdLog widget;
+        QLoguru widget;
         QCOMPARE(widget.getLoggerBackground("test"), std::nullopt);
         widget.setLoggerBackground("test", QBrush(Qt::red));
         QCOMPARE(widget.getLoggerBackground("test"), QBrush(Qt::red));
@@ -172,7 +131,7 @@ private slots:
 
     void fontTest()
     {
-        QSpdLog widget;
+        QLoguru widget;
         QFont testFont;
         testFont.setBold(true);
         QCOMPARE(widget.getLoggerBackground("test"), std::nullopt);
@@ -187,10 +146,10 @@ private slots:
 
     void runToolbarTests()
     {
-        std::vector<std::unique_ptr<QAbstractSpdLogToolBar>> toolbars;
+        std::vector<std::unique_ptr<QAbstractLoguruToolBar>> toolbars;
         toolbars.push_back(std::make_unique<QTestToolBar>());
         toolbars.push_back(
-            std::unique_ptr<QAbstractSpdLogToolBar>(createToolBar())
+            std::unique_ptr<QAbstractLoguruToolBar>(createToolBar())
         );
 
         for (auto& toolbar : toolbars) {
@@ -204,21 +163,17 @@ private slots:
         }
     }
 
-    void filterMessageAndCompletionHistory(QAbstractSpdLogToolBar* toolbar)
+    void filterMessageAndCompletionHistory(QAbstractLoguruToolBar* toolbar)
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
-
-        logger->sinks().push_back(widget.sink());
-        logger->flush_on(spdlog::level::trace);
-        logger->info("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-        logger->info("Another message");
+        QLoguru widget;
+        LOG_F(INFO,"Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+        LOG_F(INFO,"Another message");
         widget.registerToolbar(toolbar);
-
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 2);
         QTest::keyClicks(toolbar->filter(), "ipsum");
         QTest::keyClick(toolbar->filter(), Qt::Key_Enter);
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 1);
         toolbar->filter()->setText("Another");
         QCOMPARE(widget.itemsCount(), 1);
@@ -227,21 +182,17 @@ private slots:
         QCOMPARE(widget.itemsCount(), 2);
     }
 
-    void filterCaseDependant(QAbstractSpdLogToolBar* toolbar)
+    void filterCaseDependant(QAbstractLoguruToolBar* toolbar)
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
+        QLoguru widget;
 
-        logger->sinks().push_back(widget.sink());
-        logger->flush_on(spdlog::level::trace);
-        logger->info("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-        logger->info("Another message");
+        LOG_F(INFO,"Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+        LOG_F(INFO,"Another message");
         widget.registerToolbar(toolbar);
 
         QLineEdit* filter = toolbar->filter();
         QAction* caseSensitive = toolbar->caseSensitive();
-
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 2);
         filter->setText("Ipsum");
         QCOMPARE(widget.itemsCount(), 1);
@@ -261,21 +212,16 @@ private slots:
         QCOMPARE(widget.itemsCount(), 2);
     }
 
-    void filterRegularExpressions(QAbstractSpdLogToolBar* toolbar)
+    void filterRegularExpressions(QAbstractLoguruToolBar* toolbar)
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
-
-        logger->sinks().push_back(widget.sink());
-        logger->flush_on(spdlog::level::trace);
-        logger->info("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-        logger->info("Another message");
+        QLoguru widget;
+        LOG_F(INFO,"Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+        LOG_F(INFO,"Another message");
         widget.registerToolbar(toolbar);
 
         QLineEdit* filter = toolbar->filter();
         QAction* regex = toolbar->regex();
-
+        QTest::qWait(100);
         QCOMPARE(widget.itemsCount(), 2);
         filter->setText("ipsum");
         QCOMPARE(widget.itemsCount(), 1);
@@ -298,19 +244,13 @@ private slots:
         // QCOMPARE(filter->toolTip(), re.errorString());
     }
 
-    void autoScrollPolicyDefault(QAbstractSpdLogToolBar* toolbar)
+    void autoScrollPolicyDefault(QAbstractLoguruToolBar* toolbar)
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
-
-        logger->sinks().push_back(widget.sink());
-        logger->set_level(spdlog::level::trace);
-        logger->flush_on(spdlog::level::trace);
+        QLoguru widget;
         widget.registerToolbar(toolbar);
 
         QComboBox* autoScrollPolicy = toolbar->autoScrollPolicy();
-        QTreeView* treeView = widget.findChild<QTreeView*>("qspdlogTreeView");
+        QTreeView* treeView = widget.findChild<QTreeView*>("qloguruTreeView");
         QScrollBar* scrollBar = treeView->verticalScrollBar();
 
         treeView->resize(100, 100);
@@ -322,8 +262,8 @@ private slots:
         QCOMPARE(scrollBar->value(), scrollBar->maximum());
 
         for (int i = 0; i < 10; ++i)
-            logger->info("test");
-
+            LOG_F(INFO, "test %d", i);
+        QTest::qWait(100);
         auto actualValue = scrollBar->value();
         treeView->scrollToBottom();
         auto maximumValue = scrollBar->value();
@@ -331,19 +271,14 @@ private slots:
         QVERIFY(actualValue != maximumValue);
     }
 
-    void autoScrollPolicyAutoScroll(QAbstractSpdLogToolBar* toolbar)
+    void autoScrollPolicyAutoScroll(QAbstractLoguruToolBar* toolbar)
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
+        QLoguru widget;
 
-        logger->sinks().push_back(widget.sink());
-        logger->set_level(spdlog::level::trace);
-        logger->flush_on(spdlog::level::trace);
         widget.registerToolbar(toolbar);
 
         QComboBox* autoScrollPolicy = toolbar->autoScrollPolicy();
-        QTreeView* treeView = widget.findChild<QTreeView*>("qspdlogTreeView");
+        QTreeView* treeView = widget.findChild<QTreeView*>("qloguruTreeView");
         QScrollBar* scrollBar = treeView->verticalScrollBar();
 
         treeView->resize(100, 100);
@@ -354,12 +289,12 @@ private slots:
 
         // fill the visible area
         for (int i = 0; i < 5; ++i)
-            logger->info("test");
+            LOG_F(INFO, "test %d", i);
 
         QCOMPARE(scrollBar->value(), scrollBar->maximum());
 
         for (int i = 0; i < 3; ++i)
-            logger->info("test");
+            LOG_F(INFO, "test %d", i);
 
         QCOMPARE(scrollBar->value(), scrollBar->maximum());
 
@@ -370,19 +305,14 @@ private slots:
         );
     }
 
-    void autoScrollPolicySmartScroll(QAbstractSpdLogToolBar* toolbar)
+    void autoScrollPolicySmartScroll(QAbstractLoguruToolBar* toolbar)
     {
-        QSpdLog widget;
-        std::shared_ptr<spdlog::logger> logger =
-            std::make_shared<spdlog::logger>("test");
+        QLoguru widget;
 
-        logger->sinks().push_back(widget.sink());
-        logger->set_level(spdlog::level::trace);
-        logger->flush_on(spdlog::level::trace);
         widget.registerToolbar(toolbar);
 
         QComboBox* autoScrollPolicy = toolbar->autoScrollPolicy();
-        QTreeView* treeView = widget.findChild<QTreeView*>("qspdlogTreeView");
+        QTreeView* treeView = widget.findChild<QTreeView*>("qloguruTreeView");
         QScrollBar* scrollBar = treeView->verticalScrollBar();
 
         treeView->resize(100, 100);
@@ -393,34 +323,34 @@ private slots:
 
         // fill the visible area
         for (int i = 0; i < 5; ++i)
-            logger->info("test");
-
+            LOG_F(INFO, "test %d", i);
+        QTest::qWait(100);
         QCOMPARE(scrollBar->value(), scrollBar->maximum());
 
         for (int i = 0; i < 3; ++i)
-            logger->info("test");
-
+            LOG_F(INFO, "test %d", i);
+        QTest::qWait(100);
         QCOMPARE(scrollBar->value(), scrollBar->maximum());
 
         scrollBar->setValue(0);
         for (int i = 0; i < 3; ++i)
-            logger->info("test");
-
+            LOG_F(INFO, "test %d", i);
+        QTest::qWait(100);
         QVERIFY(scrollBar->value() != scrollBar->maximum());
 
         scrollBar->setValue(scrollBar->maximum());
         for (int i = 0; i < 3; ++i)
-            logger->info("test");
-
+            LOG_F(INFO, "test %d", i);
+        QTest::qWait(100);
         QCOMPARE(scrollBar->value(), scrollBar->maximum());
     }
 
     void headerColumnShowHide()
     {
-        QSpdLog widget;
-        QTreeView* treeView = widget.findChild<QTreeView*>("qspdlogTreeView");
+        QLoguru widget;
+        QTreeView* treeView = widget.findChild<QTreeView*>("qloguruTreeView");
         QHeaderView* headerView = treeView->header();
-        QCOMPARE(headerView->count(), 4);
+        QCOMPARE(headerView->count(), 5);
         QMetaObject::invokeMethod(
             headerView,
             [] {
@@ -429,7 +359,7 @@ private slots:
                 topLevelWidgets.begin(),
                 topLevelWidgets.end(),
                 [](QWidget* widget) {
-                return widget->objectName() == "qspdlogHeaderContextMenu";
+                return widget->objectName() == "qloguruHeaderContextMenu";
                 });
             QVERIFY(widgetsIt != topLevelWidgets.end());
             QMenu* menu = qobject_cast<QMenu*>(*widgetsIt);
@@ -439,7 +369,7 @@ private slots:
             },
             Qt::QueuedConnection);
         headerView->customContextMenuRequested(QPoint(5, 5));
-        QCOMPARE(headerView->count(), 4);
+        QCOMPARE(headerView->count(), 5);
         QCOMPARE(headerView->hiddenSectionCount(), 1);
         QMetaObject::invokeMethod(
             headerView,
@@ -449,7 +379,7 @@ private slots:
                 topLevelWidgets.begin(),
                 topLevelWidgets.end(),
                 [](QWidget* widget) {
-                return widget->objectName() == "qspdlogHeaderContextMenu";
+                return widget->objectName() == "qloguruHeaderContextMenu";
                 });
             QVERIFY(widgetsIt != topLevelWidgets.end());
             QMenu* menu = qobject_cast<QMenu*>(*widgetsIt);
@@ -459,7 +389,7 @@ private slots:
             },
             Qt::QueuedConnection);
         headerView->customContextMenuRequested(QPoint(5, 5));
-        QCOMPARE(headerView->count(), 4);
+        QCOMPARE(headerView->count(), 5);
         QCOMPARE(headerView->hiddenSectionCount(), 2);
         QMetaObject::invokeMethod(
             headerView,
@@ -469,7 +399,7 @@ private slots:
                 topLevelWidgets.begin(),
                 topLevelWidgets.end(),
                 [](QWidget* widget) {
-                return widget->objectName() == "qspdlogHeaderContextMenu";
+                return widget->objectName() == "qloguruHeaderContextMenu";
                 });
             QVERIFY(widgetsIt != topLevelWidgets.end());
             QMenu* menu = qobject_cast<QMenu*>(*widgetsIt);
@@ -479,20 +409,28 @@ private slots:
             },
             Qt::QueuedConnection);
         headerView->customContextMenuRequested(QPoint(5, 5));
-        QCOMPARE(headerView->count(), 4);
+        QCOMPARE(headerView->count(), 5);
         QCOMPARE(headerView->hiddenSectionCount(), 1);
     }
 
     void setStyleFromToolbar()
     {
-        QSpdLog widget;
-        auto testLogger = std::make_shared<spdlog::logger>("test");
-        auto testLogger1 = std::make_shared<spdlog::logger>("test1");
+        QLoguru widget;
 
-        testLogger->sinks().push_back(widget.sink());
-        testLogger1->sinks().push_back(widget.sink());
+        std::thread t([]() {
+            loguru::set_thread_name("test");
+            LOG_F(INFO, "test");
+        });
+        QTest::qWait(100);
+        std::thread t1([]() {
+          loguru::set_thread_name("test1");
+          LOG_F(INFO, "test1");
+        });
+        t.join();
+        t1.join();
+        QTest::qWait(100);
 
-        std::unique_ptr<QAbstractSpdLogToolBar> toolbar(createToolBar());
+        std::unique_ptr<QAbstractLoguruToolBar> toolbar(createToolBar());
         widget.registerToolbar(toolbar.get());
         QAction* style = toolbar->style();
 
@@ -503,13 +441,12 @@ private slots:
         style->trigger();
         dialogManipThread.join();
 
-        testLogger->info("test");
-        testLogger1->info("test1");
+
 
         const QTreeView* treeView =
-            widget.findChild<const QTreeView*>("qspdlogTreeView");
+            widget.findChild<const QTreeView*>("qloguruTreeView");
         const QAbstractItemModel* model = treeView->model();
-        QModelIndex index = model->index(0, 3);
+        QModelIndex index = model->index(0, 4);
         QCOMPARE(
             model->data(index, Qt::DisplayRole).value<QString>(),
             QString("test")
@@ -527,7 +464,7 @@ private slots:
             f
         );
 
-        index = model->index(1, 3);
+        index = model->index(1, 4);
         QCOMPARE(
             model->data(index, Qt::DisplayRole).value<QString>(),
             QString("test1")
@@ -547,7 +484,7 @@ private slots:
         style->trigger();
         dialogManipThread.join();
 
-        index = model->index(0, 3);
+        index = model->index(0, 4);
         QCOMPARE(
             model->data(index, Qt::DisplayRole).value<QString>(),
             QString("test")
@@ -569,7 +506,7 @@ private slots:
         style->trigger();
         dialogManipThread.join();
 
-        index = model->index(0, 3);
+        index = model->index(0, 4);
         QCOMPARE(
             model->data(index, Qt::DisplayRole).value<QString>(),
             QString("test")
@@ -588,7 +525,7 @@ private slots:
         style->trigger();
         dialogManipThread.join();
 
-        index = model->index(0, 3);
+        index = model->index(0, 4);
         QCOMPARE(
             model->data(index, Qt::DisplayRole).value<QString>(),
             QString("test")
@@ -602,7 +539,7 @@ private slots:
         QCOMPARE(
             model->data(index, Qt::FontRole).value<QFont>(), QFont {}
         );
-        index = model->index(1, 3);
+        index = model->index(1, 4);
         QCOMPARE(
             model->data(index, Qt::DisplayRole).value<QString>(),
             QString("test1")
@@ -640,7 +577,7 @@ private:
                         widgets.begin(),
                         widgets.end(),
                         [](QWidget* widget) {
-                    return widget->objectName() == "qspdlogStyleDialog";
+                    return widget->objectName() == "qloguruStyleDialog";
                         });
 
                     if (it == widgets.end())
@@ -701,5 +638,5 @@ private:
     }
 };
 
-QTEST_MAIN(QSpdLogTest);
-#include "test_qspdlog.moc"
+QTEST_MAIN(QLoguruTest);
+#include "test_qloguru.moc"

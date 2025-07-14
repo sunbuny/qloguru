@@ -1,8 +1,8 @@
 find_package(Qt${QT_VERSION} REQUIRED COMPONENTS Test)
 
-add_executable(qspdlog_test_ui test_qspdlog.cpp)
-add_executable(qspdlog::test::ui ALIAS qspdlog_test_ui)
+add_executable(qloguru_test_ui test_qloguru.cpp)
+add_executable(qloguru::test::ui ALIAS qloguru_test_ui)
 
-target_link_libraries(qspdlog_test_ui PUBLIC Qt::Test qspdlog::lib)
+target_link_libraries(qloguru_test_ui PUBLIC Qt5::Test qloguru::lib)
 
-add_test(NAME qspdlog_test_ui COMMAND qspdlog_test_ui)
+add_test(NAME qloguru_test_ui COMMAND qloguru_test_ui)
