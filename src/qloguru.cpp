@@ -7,23 +7,23 @@
 #include <QScrollBar>
 #include <QTreeView>
 
-#include "qspdlog/qspdlog.hpp"
+#include "qloguru/qloguru.hpp"
 
-#include "qspdlog/qabstract_spdlog_toolbar.hpp"
-#include "qspdlog_model.hpp"
-#include "qspdlog_proxy_model.hpp"
-#include "qspdlog_style_dialog.hpp"
-#include "qt_logger_sink.hpp"
+#include "qloguru/qabstract_loguru_toolbar.hpp"
+#include "qloguru_model.hpp"
+#include "qloguru_proxy_model.hpp"
+#include "qloguru_style_dialog.hpp"
+#include "qt_logger_sink_loguru.hpp"
 
-QSpdLog::QSpdLog(QWidget* parent)
+QLoguru::QLoguru(QWidget* parent)
     : QWidget(parent)
-    , _sourceModel(new QSpdLogModel)
-    , _proxyModel(new QSpdLogProxyModel)
+    , _sourceModel(new QLoguruModel)
+    , _proxyModel(new QLoguruProxyModel)
     , _view(new QTreeView)
 {
-    Q_INIT_RESOURCE(qspdlog_resources);
+    Q_INIT_RESOURCE(qloguru_resources);
     _view->setModel(_proxyModel);
-    _view->setObjectName("qspdlogTreeView");
+    _view->setObjectName("qloguruTreeView");
 
     QHeaderView* header = _view->header();
     header->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -33,7 +33,7 @@ QSpdLog::QSpdLog(QWidget* parent)
         this,
         [ this, header ](const QPoint& pos) {
         QMenu contextMenu;
-        contextMenu.setObjectName("qspdlogHeaderContextMenu");
+        contextMenu.setObjectName("qloguruHeaderContextMenu");
         for (int i = 0; i < _sourceModel->columnCount(); ++i) {
             QString columnHeader =
                 _sourceModel->headerData(i, Qt::Horizontal).toString();
@@ -76,13 +76,13 @@ QSpdLog::QSpdLog(QWidget* parent)
     layout()->addWidget(_view);
 }
 
-QSpdLog::~QSpdLog()
+QLoguru::~QLoguru()
 {
 }
 
-void QSpdLog::clear() { _sourceModel->clear(); }
+void QLoguru::clear() { _sourceModel->clear(); }
 
-void QSpdLog::registerToolbar(QAbstractSpdLogToolBar* toolbarInterface)
+void QLoguru::registerToolbar(QAbstractLoguruToolBar* toolbarInterface)
 {
     toolbarInterface->setParent(this);
     _toolbars.push_back(toolbarInterface);
@@ -103,13 +103,13 @@ void QSpdLog::registerToolbar(QAbstractSpdLogToolBar* toolbarInterface)
     connect(regex, &QAction::toggled, this, updateFilter);
     connect(caseSensitive, &QAction::toggled, this, updateFilter);
     connect(style, &QAction::triggered, this, [ this ]() {
-        QSpdLogStyleDialog dialog;
+        QLoguruStyleDialog dialog;
         dialog.setModel(_sourceModel);
-        dialog.setObjectName("qspdlogStyleDialog");
+        dialog.setObjectName("qloguruStyleDialog");
         if (!dialog.exec())
             return;
 
-        QSpdLogStyleDialog::Style value = dialog.result();
+        QLoguruStyleDialog::Style value = dialog.result();
 
         _sourceModel->setLoggerBackground(
             value.loggerName, value.backgroundColor
@@ -125,11 +125,11 @@ void QSpdLog::registerToolbar(QAbstractSpdLogToolBar* toolbarInterface)
         autoScrollPolicyCombo,
         QOverload<int>::of(&QComboBox::currentIndexChanged),
         this,
-        &QSpdLog::updateAutoScrollPolicy
+        &QLoguru::updateAutoScrollPolicy
     );
 }
 
-void QSpdLog::removeToolbar(QAbstractSpdLogToolBar* toolbarInterface)
+void QLoguru::removeToolbar(QAbstractLoguruToolBar* toolbarInterface)
 {
     _toolbars.erase(
         std::remove(_toolbars.begin(), _toolbars.end(), toolbarInterface),
@@ -137,7 +137,7 @@ void QSpdLog::removeToolbar(QAbstractSpdLogToolBar* toolbarInterface)
     );
 }
 
-void QSpdLog::filterData(
+void QLoguru::filterData(
     const QString& text, bool isRegularExpression, bool isCaseSensitive
 )
 {
@@ -157,7 +157,7 @@ void QSpdLog::filterData(
     }
 }
 
-void QSpdLog::setAutoScrollPolicy(AutoScrollPolicy policy)
+void QLoguru::setAutoScrollPolicy(AutoScrollPolicy policy)
 {
     QObject::disconnect(_scrollConnection);
 
@@ -165,7 +165,7 @@ void QSpdLog::setAutoScrollPolicy(AutoScrollPolicy policy)
         case AutoScrollPolicy::AutoScrollPolicyEnabled: {
             _scrollConnection = connect(
                 _sourceModel,
-                &QSpdLogModel::rowsInserted,
+                &QLoguruModel::rowsInserted,
                 _view,
                 &QTreeView::scrollToBottom
             );
@@ -175,7 +175,7 @@ void QSpdLog::setAutoScrollPolicy(AutoScrollPolicy policy)
         case AutoScrollPolicy::AutoScrollPolicyEnabledIfBottom: {
             _scrollConnection = connect(
                 _sourceModel,
-                &QSpdLogModel::rowsInserted,
+                &QLoguruModel::rowsInserted,
                 this,
                 [ this ]() {
                 // We can't check if the scrollbar is at the bottom here because
@@ -207,61 +207,61 @@ void QSpdLog::setAutoScrollPolicy(AutoScrollPolicy policy)
     }
 }
 
-void QSpdLog::updateAutoScrollPolicy(int index)
+void QLoguru::updateAutoScrollPolicy(int index)
 {
     AutoScrollPolicy policy = static_cast<AutoScrollPolicy>(index);
     setAutoScrollPolicy(policy);
 }
 
-std::size_t QSpdLog::itemsCount() const
+std::size_t QLoguru::itemsCount() const
 {
     return static_cast<std::size_t>(_proxyModel->rowCount());
 }
 
-void QSpdLog::setMaxEntries(std::optional<std::size_t> maxEntries)
+void QLoguru::setMaxEntries(std::optional<std::size_t> maxEntries)
 {
     _sourceModel->setMaxEntries(maxEntries);
 }
 
-std::optional<std::size_t> QSpdLog::getMaxEntries() const
+std::optional<std::size_t> QLoguru::getMaxEntries() const
 {
     return _sourceModel->getMaxEntries();
 }
 
-void QSpdLog::setLoggerForeground(
+void QLoguru::setLoggerForeground(
     std::string_view loggerName, std::optional<QColor> brush
 )
 {
     _sourceModel->setLoggerForeground(loggerName, brush);
 }
 
-std::optional<QColor> QSpdLog::getLoggerForeground(std::string_view loggerName
+std::optional<QColor> QLoguru::getLoggerForeground(std::string_view loggerName
 ) const
 {
     return _sourceModel->getLoggerForeground(loggerName);
 }
 
-void QSpdLog::setLoggerBackground(
+void QLoguru::setLoggerBackground(
     std::string_view loggerName, std::optional<QBrush> brush
 )
 {
     _sourceModel->setLoggerBackground(loggerName, brush);
 }
 
-std::optional<QBrush> QSpdLog::getLoggerBackground(std::string_view loggerName
+std::optional<QBrush> QLoguru::getLoggerBackground(std::string_view loggerName
 ) const
 {
     return _sourceModel->getLoggerBackground(loggerName);
 }
 
-void QSpdLog::setLoggerFont(
+void QLoguru::setLoggerFont(
     std::string_view loggerName, std::optional<QFont> font
 )
 {
     _sourceModel->setLoggerFont(loggerName, font);
 }
 
-std::optional<QFont> QSpdLog::getLoggerFont(std::string_view loggerName) const
+std::optional<QFont> QLoguru::getLoggerFont(std::string_view loggerName) const
 {
     return _sourceModel->getLoggerFont(loggerName);
 }

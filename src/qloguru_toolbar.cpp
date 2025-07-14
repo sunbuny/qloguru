@@ -6,9 +6,9 @@
 #include <QSettings>
 #include <QStringListModel>
 
-#include "qspdlog_toolbar.hpp"
+#include "qloguru_toolbar.hpp"
 
-QSpdLogToolBar::QSpdLogToolBar(QWidget* parent)
+QLoguruToolBar::QLoguruToolBar(QWidget* parent)
     : QToolBar(parent)
     , _filterWidget(new QLineEdit(this))
     , _clearHistory(new QAction("Clear History", this))
@@ -47,7 +47,7 @@ QSpdLogToolBar::QSpdLogToolBar(QWidget* parent)
     lineEdit->setCompleter(_completer);
 
     connect(
-        lineEdit, &QLineEdit::textChanged, this, &QSpdLogToolBar::filterChanged
+        lineEdit, &QLineEdit::textChanged, this, &QLoguruToolBar::filterChanged
     );
     connect(lineEdit, &QLineEdit::editingFinished, this, [ this ]() {
         QStringListModel* model =
@@ -63,10 +63,10 @@ QSpdLogToolBar::QSpdLogToolBar(QWidget* parent)
         saveCompleterHistory();
     });
     connect(
-        _caseAction, &QAction::toggled, this, &QSpdLogToolBar::filterChanged
+        _caseAction, &QAction::toggled, this, &QLoguruToolBar::filterChanged
     );
     connect(
-        _regexAction, &QAction::toggled, this, &QSpdLogToolBar::filterChanged
+        _regexAction, &QAction::toggled, this, &QLoguruToolBar::filterChanged
     );
     connect(_styleAction, &QAction::triggered, this, [ this ]() {
         emit styleChangeRequested();
@@ -75,52 +75,52 @@ QSpdLogToolBar::QSpdLogToolBar(QWidget* parent)
         _autoScrollPolicy,
         QOverload<int>::of(&QComboBox::currentIndexChanged),
         this,
-        &QSpdLogToolBar::autoScrollPolicyChanged
+        &QLoguruToolBar::autoScrollPolicyChanged
     );
     connect(
         this,
-        &QSpdLogToolBar::filterChanged,
+        &QLoguruToolBar::filterChanged,
         this,
-        &QSpdLogToolBar::checkInputValidity
+        &QLoguruToolBar::checkInputValidity
     );
     connect(
         _clearHistory,
         &QAction::triggered,
         this,
-        &QSpdLogToolBar::clearCompleterHistory
+        &QLoguruToolBar::clearCompleterHistory
     );
     loadCompleterHistory();
 }
 
-QSpdLogToolBar::~QSpdLogToolBar() { }
+QLoguruToolBar::~QLoguruToolBar() { }
 
 #pragma region QAbstractSpdLogToolBar
 
-QLineEdit* QSpdLogToolBar::filter()
+QLineEdit* QLoguruToolBar::filter()
 {
     return static_cast<QLineEdit*>(_filterWidget);
 }
 
-QAction* QSpdLogToolBar::caseSensitive() { return _caseAction; }
+QAction* QLoguruToolBar::caseSensitive() { return _caseAction; }
 
-QAction* QSpdLogToolBar::regex() { return _regexAction; }
+QAction* QLoguruToolBar::regex() { return _regexAction; }
 
-QAction* QSpdLogToolBar::clearHistory() { return _clearHistory; }
+QAction* QLoguruToolBar::clearHistory() { return _clearHistory; }
 
-QAction* QSpdLogToolBar::style() { return _styleAction; }
+QAction* QLoguruToolBar::style() { return _styleAction; }
 
-QComboBox* QSpdLogToolBar::autoScrollPolicy() { return _autoScrollPolicy; }
+QComboBox* QLoguruToolBar::autoScrollPolicy() { return _autoScrollPolicy; }
 
 #pragma endregion
 
-QSpdLogToolBar::FilteringSettings QSpdLogToolBar::filteringSettings() const
+QLoguruToolBar::FilteringSettings QLoguruToolBar::filteringSettings() const
 {
     return { static_cast<QLineEdit*>(_filterWidget)->text(),
              _regexAction->isChecked(),
              _caseAction->isChecked() };
 }
 
-void QSpdLogToolBar::checkInputValidity()
+void QLoguruToolBar::checkInputValidity()
 {
     FilteringSettings settings = filteringSettings();
 
@@ -144,28 +144,28 @@ void QSpdLogToolBar::checkInputValidity()
     _filterWidget->setToolTip(regex.errorString());
 }
 
-void QSpdLogToolBar::clearCompleterHistory()
+void QLoguruToolBar::clearCompleterHistory()
 {
     QStringListModel* model = static_cast<QStringListModel*>(_completerData);
     model->setStringList({});
     saveCompleterHistory();
 }
 
-void QSpdLogToolBar::loadCompleterHistory()
+void QLoguruToolBar::loadCompleterHistory()
 {
     QStringListModel* model = static_cast<QStringListModel*>(_completerData);
     model->setStringList(
-        QSettings("./qspdlog_filter_history", QSettings::NativeFormat)
+        QSettings("./qloguru_filter_history", QSettings::NativeFormat)
             .value("completerHistory")
             .toStringList()
     );
 }
 
-void QSpdLogToolBar::saveCompleterHistory()
+void QLoguruToolBar::saveCompleterHistory()
 {
     QStringListModel* model = static_cast<QStringListModel*>(_completerData);
-    QSettings("./qspdlog_filter_history", QSettings::NativeFormat)
+    QSettings("./qloguru_filter_history", QSettings::NativeFormat)
         .setValue("completerHistory", model->stringList());
 }
 
-extern QAbstractSpdLogToolBar* createToolBar() { return new QSpdLogToolBar(); }
+extern QAbstractLoguruToolBar* createToolBar() { return new QLoguruToolBar(); }

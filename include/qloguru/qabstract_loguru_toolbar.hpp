@@ -3,20 +3,20 @@
 class QLineEdit;
 class QAction;
 class QComboBox;
-class QSpdLog;
+class QLoguru;
 
-class QAbstractSpdLogToolBar
+class QAbstractLoguruToolBar
 {
 public:
     /**
      * @brief Constructor
      */
-    explicit QAbstractSpdLogToolBar() = default;
+    explicit QAbstractLoguruToolBar() = default;
 
     /**
      * @brief Destructor
      */
-    virtual ~QAbstractSpdLogToolBar();
+    virtual ~QAbstractLoguruToolBar();
 
 public:
     /**
@@ -24,7 +24,7 @@ public:
      *
      * @param parent the parent
      */
-    void setParent(QSpdLog* parent);
+    void setParent(QLoguru* parent);
 
     /**
      * @brief Get the filter text editing widget.
@@ -82,7 +82,7 @@ public:
     virtual QComboBox* autoScrollPolicy() = 0;
 
 private:
-    QSpdLog* _parent;
+    QLoguru* _parent;
 };
 
-extern QAbstractSpdLogToolBar* createToolBar();
+extern QAbstractLoguruToolBar* createToolBar();

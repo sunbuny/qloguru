@@ -6,7 +6,7 @@
 #include <map>
 #include <array>
 
-#include "qspdlog_model.hpp"
+#include "qloguru_model.hpp"
 
 namespace
 {
@@ -33,12 +33,12 @@ static constexpr std::array<const char*, 5> column_names = {
 
 } // namespace
 
-QSpdLogModel::QSpdLogModel(QObject* parent)
+QLoguruModel::QLoguruModel(QObject* parent)
     : QAbstractListModel(parent)
 {
 }
 
-void QSpdLogModel::addEntry(entry_t entry)
+void QLoguruModel::addEntry(entry_t entry)
 {
     if (_maxEntries > 0 && _items.size() == _maxEntries) {
         beginRemoveRows(QModelIndex(), 0, 0);
@@ -53,7 +53,7 @@ void QSpdLogModel::addEntry(entry_t entry)
     endInsertRows();
 }
 
-void QSpdLogModel::setMaxEntries(std::optional<std::size_t> maxEntries)
+void QLoguruModel::setMaxEntries(std::optional<std::size_t> maxEntries)
 {
     _maxEntries = maxEntries;
     // Incase the new maximum is below the current amount of items.
@@ -65,29 +65,29 @@ void QSpdLogModel::setMaxEntries(std::optional<std::size_t> maxEntries)
     }
 }
 
-std::optional<std::size_t> QSpdLogModel::getMaxEntries() const
+std::optional<std::size_t> QLoguruModel::getMaxEntries() const
 {
     return _maxEntries;
 }
 
-void QSpdLogModel::clear()
+void QLoguruModel::clear()
 {
     beginResetModel();
     _items.clear();
     endResetModel();
 }
 
-int QSpdLogModel::rowCount(const QModelIndex& parent) const
+int QLoguruModel::rowCount(const QModelIndex& parent) const
 {
     return _items.size();
 }
 
-int QSpdLogModel::columnCount(const QModelIndex& parent) const
+int QLoguruModel::columnCount(const QModelIndex& parent) const
 {
     return static_cast<std::size_t>(Column::Last);
 }
 
-QVariant QSpdLogModel::data(const QModelIndex& index, int role) const
+QVariant QLoguruModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || index.row() >= _items.size())
         return QVariant();
@@ -168,7 +168,7 @@ QVariant QSpdLogModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-QVariant QSpdLogModel::headerData(
+QVariant QLoguruModel::headerData(
     int section, Qt::Orientation orientation, int role
 ) const
 {
@@ -178,7 +178,7 @@ QVariant QSpdLogModel::headerData(
     return QVariant();
 }
 
-void QSpdLogModel::setLoggerForeground(
+void QLoguruModel::setLoggerForeground(
     std::string_view loggerName, std::optional<QColor> color
 )
 {
@@ -205,7 +205,7 @@ void QSpdLogModel::setLoggerForeground(
     }
 }
 
-std::optional<QColor> QSpdLogModel::getLoggerForeground(
+std::optional<QColor> QLoguruModel::getLoggerForeground(
     std::string_view loggerName
 ) const
 {
@@ -215,7 +215,7 @@ std::optional<QColor> QSpdLogModel::getLoggerForeground(
     return std::nullopt;
 }
 
-void QSpdLogModel::setLoggerBackground(
+void QLoguruModel::setLoggerBackground(
     std::string_view loggerName, std::optional<QBrush> brush
 )
 {
@@ -242,7 +242,7 @@ void QSpdLogModel::setLoggerBackground(
     }
 }
 
-std::optional<QBrush> QSpdLogModel::getLoggerBackground(
+std::optional<QBrush> QLoguruModel::getLoggerBackground(
     std::string_view loggerName
 ) const
 {
@@ -252,7 +252,7 @@ std::optional<QBrush> QSpdLogModel::getLoggerBackground(
     return std::nullopt;
 }
 
-void QSpdLogModel::setLoggerFont(
+void QLoguruModel::setLoggerFont(
     std::string_view loggerName, std::optional<QFont> font
 )
 {
@@ -275,7 +275,7 @@ void QSpdLogModel::setLoggerFont(
     }
 }
 
-std::optional<QFont> QSpdLogModel::getLoggerFont(std::string_view loggerName
+std::optional<QFont> QLoguruModel::getLoggerFont(std::string_view loggerName
 ) const
 {
     if (_fontMappings.contains(std::string(loggerName)))

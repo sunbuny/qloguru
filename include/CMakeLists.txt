@@ -1,7 +1,7 @@
 add_library(
-  qspdlog_interface INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/qspdlog/qspdlog.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/qspdlog/qabstract_spdlog_toolbar.hpp)
-add_library(qspdlog::interface ALIAS qspdlog_interface)
+  qloguru_interface INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/qloguru/qloguru.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/qloguru/qabstract_loguru_toolbar.hpp)
+add_library(qloguru::interface ALIAS qloguru_interface)
 
-target_include_directories(qspdlog_interface
+target_include_directories(qloguru_interface
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

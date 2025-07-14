@@ -3,9 +3,9 @@
 #include <QDialog>
 #include <optional>
 
-class QSpdLogModel;
+class QLoguruModel;
 
-class QSpdLogStyleDialog : public QDialog
+class QLoguruStyleDialog : public QDialog
 {
     Q_OBJECT
 
@@ -18,13 +18,13 @@ public:
     };
 
 public:
-    explicit QSpdLogStyleDialog(QWidget* parent = nullptr);
-    ~QSpdLogStyleDialog() override;
+    explicit QLoguruStyleDialog(QWidget* parent = nullptr);
+    ~QLoguruStyleDialog() override;
 
     Style result() const;
-    void setModel(const QSpdLogModel* model);
+    void setModel(const QLoguruModel* model);
 
 private:
     Style _result;
-    const QSpdLogModel* _model;
+    const QLoguruModel* _model;
 };

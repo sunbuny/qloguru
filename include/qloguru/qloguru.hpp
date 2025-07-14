@@ -5,10 +5,10 @@
 
 
 class QtLoggerSink;
-class QAbstractSpdLogToolBar;
+class QAbstractLoguruToolBar;
 class QMenu;
-class QSpdLogModel;
-class QSpdLogProxyModel;
+class QLoguruModel;
+class QLoguruProxyModel;
 class QTreeView;
 
 enum class AutoScrollPolicy {
@@ -21,7 +21,7 @@ enum class AutoScrollPolicy {
            // before inserting the new ones.
 };
 
-class QSpdLog : public QWidget
+class QLoguru : public QWidget
 {
 public:
     /**
@@ -29,12 +29,12 @@ public:
      *
      * @param parent The parent widget.
      */
-    explicit QSpdLog(QWidget* parent = nullptr);
+    explicit QLoguru(QWidget* parent = nullptr);
 
     /**
      * @brief Destructor
      */
-    ~QSpdLog();
+    ~QLoguru();
 
 public:
     /**
@@ -54,7 +54,7 @@ public:
      *
      * @param toolbar the toolbar
      */
-    void registerToolbar(QAbstractSpdLogToolBar* toolbar);
+    void registerToolbar(QAbstractLoguruToolBar* toolbar);
 
     /**
      * @brief Remove a toolbar.
@@ -64,7 +64,7 @@ public:
      *
      * @param toolbar the toolbar
      */
-    void removeToolbar(QAbstractSpdLogToolBar* toolbar);
+    void removeToolbar(QAbstractLoguruToolBar* toolbar);
 
 
     /**
@@ -171,11 +171,11 @@ private slots:
     void updateAutoScrollPolicy(int index);
 
 private:
-    QSpdLogModel* _sourceModel;
-    QSpdLogProxyModel* _proxyModel;
+    QLoguruModel* _sourceModel;
+    QLoguruProxyModel* _proxyModel;
     QTreeView* _view;
     bool _scrollIsAtBottom;
     QMetaObject::Connection _scrollConnection;
     std::shared_ptr<QtLoggerSink> _sink;
-    std::list<QAbstractSpdLogToolBar*> _toolbars;
+    std::list<QAbstractLoguruToolBar*> _toolbars;
 };

@@ -3,11 +3,11 @@
 #include <QDialogButtonBox>
 #include <QLineEdit>
 
-#include "qspdlog_style_dialog.hpp"
+#include "qloguru_style_dialog.hpp"
 
-#include "qspdlog_model.hpp"
+#include "qloguru_model.hpp"
 
-QSpdLogStyleDialog::QSpdLogStyleDialog(QWidget* parent)
+QLoguruStyleDialog::QLoguruStyleDialog(QWidget* parent)
     : QDialog(parent)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -97,8 +97,8 @@ QSpdLogStyleDialog::QSpdLogStyleDialog(QWidget* parent)
     });
 }
 
-QSpdLogStyleDialog::~QSpdLogStyleDialog() = default;
+QLoguruStyleDialog::~QLoguruStyleDialog() = default;
 
-QSpdLogStyleDialog::Style QSpdLogStyleDialog::result() const { return _result; }
+QLoguruStyleDialog::Style QLoguruStyleDialog::result() const { return _result; }
 
-void QSpdLogStyleDialog::setModel(const QSpdLogModel* model) { _model = model; }
+void QLoguruStyleDialog::setModel(const QLoguruModel* model) { _model = model; }

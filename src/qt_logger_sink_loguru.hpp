@@ -1,5 +1,5 @@
 #pragma once
-#include "qspdlog_model.hpp"
+#include "qloguru_model.hpp"
 #include <regex>
 #include <string>
 #include <loguru.hpp>
@@ -10,7 +10,7 @@
 class QtLoggerSink : public QObject {
     Q_OBJECT
 public:
-    explicit QtLoggerSink(QSpdLogModel* model, QObject* parent = nullptr)
+    explicit QtLoggerSink(QLoguruModel* model, QObject* parent = nullptr)
         : QObject(parent), _model(model)
     {
         loguru::add_callback("qt_logger_sink", QtLoggerSink::callback, _model, loguru::Verbosity_INFO);
@@ -19,7 +19,7 @@ public:
     static void callback(void* user_data, const loguru::Message& message)
     {
         if (!user_data) return;
-        QSpdLogModel::entry_t entry;
+        QLoguruModel::entry_t entry;
         std::regex pattern(R"(.*?(\d{2}:\d{2}:\d{2}\.\d{3})\s+\(\s*([0-9.]+s)\)\s+\[\s*(.*?)\s*\])");
         std::smatch match;
         std::string preamble(message.preamble);
@@ -36,7 +36,7 @@ public:
         entry.level = static_cast<int>(message.verbosity);
         entry.message = message.message;
         // make sure addEntry is call by QT GUI thread
-        auto model = (QSpdLogModel*)user_data;
+        auto model = (QLoguruModel*)user_data;
         QMetaObject::invokeMethod(model, [model, entry]() {
             model->addEntry(entry);
         }, Qt::QueuedConnection);
@@ -49,6 +49,6 @@ public:
     void invalidate() { _model = nullptr; }
 
 private:
-    QSpdLogModel* _model;
+    QLoguruModel* _model;
 };
 

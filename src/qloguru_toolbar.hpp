@@ -2,7 +2,7 @@
 
 #include <QToolBar>
 
-#include "qspdlog/qabstract_spdlog_toolbar.hpp"
+#include "qloguru/qabstract_loguru_toolbar.hpp"
 
 class QWidget;
 class QAction;
@@ -10,9 +10,9 @@ class QCompleter;
 class QAbstractItemModel;
 class QSettings;
 
-class QSpdLogToolBar
+class QLoguruToolBar
     : public QToolBar
-    , public QAbstractSpdLogToolBar
+    , public QAbstractLoguruToolBar
 {
     Q_OBJECT
 
@@ -24,10 +24,10 @@ public:
     };
 
 public:
-    QSpdLogToolBar(QWidget* parent = nullptr);
-    ~QSpdLogToolBar();
+    QLoguruToolBar(QWidget* parent = nullptr);
+    ~QLoguruToolBar();
 
-#pragma region QAbstractSpdLogToolBar
+#pragma region QAbstractLoguruToolBar
     QLineEdit* filter() override;
     QAction* caseSensitive() override;
     QAction* regex() override;

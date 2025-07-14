@@ -1,11 +1,11 @@
 set(SOURCES
-    qspdlog.cpp qabstract_spdlog_toolbar.cpp qspdlog_model.cpp
-    qspdlog_proxy_model.cpp qspdlog_toolbar.cpp qspdlog_style_dialog.cpp)
-set(HEADERS qspdlog_model.hpp qt_logger_sink.hpp qspdlog_proxy_model.hpp
-            qspdlog_style_dialog.hpp)
-set(RESOURCES qspdlog_resources.qrc)
+    qloguru.cpp qabstract_loguru_toolbar.cpp qloguru_model.cpp
+    qloguru_proxy_model.cpp qloguru_toolbar.cpp qloguru_style_dialog.cpp)
+set(HEADERS qloguru_model.hpp qt_logger_sink_loguru.hpp qloguru_proxy_model.hpp
+            qloguru_style_dialog.hpp)
+set(RESOURCES qloguru_resources.qrc)
 
-add_library(qspdlog_lib STATIC ${HEADERS} ${SOURCES} ${RESOURCES})
-add_library(qspdlog::lib ALIAS qspdlog_lib)
+add_library(qloguru_lib STATIC ${HEADERS} ${SOURCES} ${RESOURCES})
+add_library(qloguru::lib ALIAS qloguru_lib)
 
-target_link_libraries(qspdlog_lib PUBLIC qspdlog::interface)
+target_link_libraries(qloguru_lib PUBLIC qloguru::interface)

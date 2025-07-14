@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(qspdlog)
+project(qloguru)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -24,13 +24,11 @@ endif()
 
 find_package(Qt${QT_VERSION} REQUIRED COMPONENTS Core Gui Widgets)
 add_subdirectory(thirdparty)
-# find_package(spdlog REQUIRED)  # 移除 spdlog
 
 
 add_subdirectory(include)
 
-# link_libraries(Qt::Widgets spdlog::spdlog qspdlog::interface)
-link_libraries(Qt5::Widgets loguru qspdlog::interface)
+link_libraries(Qt5::Widgets loguru qloguru::interface)
 
 if(QSPDLOG_REPORT_COVERAGE)
   message("Building with coverage report")

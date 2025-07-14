@@ -8,8 +8,8 @@
 #include <thread>
 #include <QDebug>
 
-#include "qspdlog/qabstract_spdlog_toolbar.hpp"
-#include "qspdlog/qspdlog.hpp"
+#include "qloguru/qabstract_loguru_toolbar.hpp"
+#include "qloguru/qloguru.hpp"
 #include <loguru.hpp>
 
 void configureColorScheme()
@@ -59,7 +59,7 @@ void configureColorScheme()
 }
 
 void configureToolbar(
-    QToolBar& toolbar, QSpdLog& logView
+    QToolBar& toolbar, QLoguru& logView
 )
 {
     QAction* clearAction = toolbar.addAction("Clear");
@@ -116,7 +116,7 @@ void configureToolbar(
 
 int main(int argc, char** argv)
 {
-    Q_INIT_RESOURCE(qspdlog_resources);
+    Q_INIT_RESOURCE(qloguru_resources);
 
     loguru::init(argc, argv);
 
@@ -127,11 +127,11 @@ int main(int argc, char** argv)
     QToolBar toolbar("Manipulation toolbar");
     toolbar.show();
 
-    QSpdLog log;
+    QLoguru log;
     log.show();
     log.move(toolbar.pos() + QPoint(0, toolbar.height() + 50));
 
-    QAbstractSpdLogToolBar* logToolbar = createToolBar();
+    QAbstractLoguruToolBar* logToolbar = createToolBar();
     log.registerToolbar(logToolbar);
     dynamic_cast<QWidget*>(logToolbar)->show();
 

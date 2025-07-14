@@ -5,7 +5,7 @@
 #include <optional>
 #include <QFont>
 
-class QSpdLogModel : public QAbstractListModel
+class QLoguruModel : public QAbstractListModel
 {
 public:
     Q_OBJECT
@@ -19,8 +19,8 @@ public:
     };
 
 public:
-    QSpdLogModel(QObject* parent = nullptr);
-    ~QSpdLogModel() override = default;
+    QLoguruModel(QObject* parent = nullptr);
+    ~QLoguruModel() override = default;
 
     void addEntry(entry_t entry);
     void clear();
