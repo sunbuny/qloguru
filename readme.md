@@ -1,4 +1,4 @@
-# QSpdLog
+# QLoguru (A loguru-derived version based on QSpdlog)
 
 ![QSpdLog](docs/images/demo_screenshot.png)
 
@@ -30,34 +30,31 @@ In its initial implementation only CMake tool is considered. To use the library 
 1. Add the library as a submodule (or any kind of folder in your machine)
 
    ```bash
-   git submodule add https://github.com/arsdever/qspdlog.git
+   git submodule add https://github.com/sunbuny/qspdlog.git
    ```
 
 2. Add the library to your CMake project
 
    ```cmake
-   add_subdirectory(qspdlog)
+   add_subdirectory(qloguru)
    ```
 
 3. Add the library to your target
 
    ```cmake
-   target_link_libraries(${PROJECT_NAME} qspdlog::lib)
+   target_link_libraries(${PROJECT_NAME} qloguru::lib)
    ```
 
 4. Include the interface header into the source file where you want to instantiate the widget
 
    ```cpp
-   #include <qspdlog/qspdlog.h>
+   #include <qloguru/qloguru.h>
    ```
 
 5. Instantiate the widget, register loggers and show the widget
 
    ```cpp
-   QSpdLogWidget* widget = new QSpdLogWidget();
-
-   auto sink = widget->sink();
-   // register the sink to whatever logger you want
+   QLoguruWidget* widget = new QLoguruWidget();
 
    widget->show();
    ```
@@ -72,9 +69,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-* [spdlog](https://github.com/gabime/spdlog) for the logging library
+* [loguru](https://github.com/emilk/loguru) for the logging library
 * [Qt](https://www.qt.io/) for the GUI framework
 
-## Projects using QSpdLog
-
-* [gamify](https://github.com/arsdever/gamify)
