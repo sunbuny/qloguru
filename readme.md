@@ -5,7 +5,7 @@
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/arsdever/qspdlog/build_linux.yml?label=linux&logo=github)](https://github.com/arsdever/qspdlog/actions/workflows/main_ci.yml?query=branch%3Amain+)
 [![Coverage](https://img.shields.io/codecov/c/gh/arsdever/qspdlog?flag=uitests&logo=codecov&token=7d1a74f3-709e-4b2b-9b6f-c2ed5c36d7a4)](https://app.codecov.io/gh/arsdever/qspdlog/commit/4cb624e6fe8d0abcf810ba3b2ea9db69755c9ffd/tree)
 
-This repository contains the source code of a library, which provides a Qt widget for displaying log messages coming from the [spdlog](https://github.com/gabime/spdlog) library.
+This repository contains the source code of a library, which provides a Qt widget for displaying log messages coming from the [loguru](https://github.com/emilk/loguru) library.
 
 ## Features
 
@@ -30,7 +30,7 @@ In its initial implementation only CMake tool is considered. To use the library 
 1. Add the library as a submodule (or any kind of folder in your machine)
 
    ```bash
-   git submodule add https://github.com/sunbuny/qspdlog.git
+   git submodule add https://github.com/sunbuny/qloguru.git
    ```
 
 2. Add the library to your CMake project
